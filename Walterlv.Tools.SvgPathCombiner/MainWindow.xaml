@@ -1,0 +1,98 @@
+﻿<Window x:Class="Walterlv.Tools.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Walterlv.Tools"
+        xmlns:avalon="http://icsharpcode.net/sharpdevelop/avalonedit"
+        mc:Ignorable="d"
+        Title="SVG 路径化 (v1.0 2021.04.26)" Height="450" Width="800"
+        UseLayoutRounding="True">
+
+    <FrameworkElement.Resources>
+        <DrawingBrush x:Key="Brush.TransparentGrid" Stretch="None" TileMode="Tile" Viewport="0 0 64 64" ViewportUnits="Absolute">
+            <DrawingBrush.Drawing>
+                <DrawingGroup>
+                    <GeometryDrawing Brush="#808285">
+                        <GeometryDrawing.Geometry>
+                            <RectangleGeometry Rect="0 0 32 32" />
+                        </GeometryDrawing.Geometry>
+                    </GeometryDrawing>
+                    <GeometryDrawing Brush="#515151">
+                        <GeometryDrawing.Geometry>
+                            <RectangleGeometry Rect="32 0 32 32" />
+                        </GeometryDrawing.Geometry>
+                    </GeometryDrawing>
+                    <GeometryDrawing Brush="#515151">
+                        <GeometryDrawing.Geometry>
+                            <RectangleGeometry Rect="0 32 32 32" />
+                        </GeometryDrawing.Geometry>
+                    </GeometryDrawing>
+                    <GeometryDrawing Brush="#808285">
+                        <GeometryDrawing.Geometry>
+                            <RectangleGeometry Rect="32 32 32 32" />
+                        </GeometryDrawing.Geometry>
+                    </GeometryDrawing>
+                </DrawingGroup>
+            </DrawingBrush.Drawing>
+        </DrawingBrush>
+    </FrameworkElement.Resources>
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" MinHeight="80" />
+            <RowDefinition Height="2*" MinHeight="80" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+
+        <Border x:Name="BeforeBorder" Grid.Row="0" Grid.Column="0"
+                BorderBrush="#f0f0f0" BorderThickness="4 4 2 4"
+                Background="{StaticResource Brush.TransparentGrid}"
+                AllowDrop="True" DragOver="BeforeBorder_DragOver" Drop="BeforeBorder_Drop">
+            <Border x:Name="BeforePathBorder" HorizontalAlignment="Center" VerticalAlignment="Center" Background="White">
+                <UIElement.Effect>
+                    <DropShadowEffect BlurRadius="8" ShadowDepth="2" Direction="-90" Opacity="0.75" />
+                </UIElement.Effect>
+                <Image Stretch="None">
+                    <Image.Source>
+                        <DrawingImage x:Name="BeforeDrawingImage" />
+                    </Image.Source>
+                </Image>
+            </Border>
+        </Border>
+        <Border x:Name="AfterBorder" Grid.Row="0" Grid.Column="1"
+                BorderBrush="#f0f0f0" BorderThickness="2 4 4 4"
+                Background="{StaticResource Brush.TransparentGrid}">
+            <Border x:Name="AfterPathBorder" HorizontalAlignment="Center" VerticalAlignment="Center" Background="White">
+                <UIElement.Effect>
+                    <DropShadowEffect BlurRadius="8" ShadowDepth="2" Direction="-90" Opacity="0.75" />
+                </UIElement.Effect>
+                <Border ClipToBounds="True">
+                    <Path x:Name="AfterPath" Fill="Black" />
+                </Border>
+            </Border>
+        </Border>
+
+        <GridSplitter Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
+                      HorizontalAlignment="Stretch" VerticalAlignment="Bottom"
+                      Height="4" Background="Transparent" />
+
+        <Grid x:Name="BeforePanel" Grid.Row="1" Grid.Column="0">
+            <avalon:TextEditor Grid.Column="1" x:Name="BeforeTextEditor"
+                               Padding="12 0 0 0" WordWrap="True" IsReadOnly="True"
+                               FontSize="14" FontFamily="Consolas,Microsoft YaHei"
+                               ShowLineNumbers="True" />
+        </Grid>
+
+        <Grid x:Name="AfterPanel" Grid.Row="1" Grid.Column="1">
+            <TextBox x:Name="AfterTextEditor"
+                     Foreground="#0000ff" Padding="0 2" TextWrapping="Wrap"
+                     FontSize="16" FontFamily="Consolas,Microsoft YaHei"
+                     TextChanged="AfterTextEditor_TextChanged" />
+        </Grid>
+
+    </Grid>
+</Window>
