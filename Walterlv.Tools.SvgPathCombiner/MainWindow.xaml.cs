@@ -53,7 +53,11 @@ namespace Walterlv.Tools
             {
                 var text = File.ReadAllText(svgFile.FullName);
 
-                var rawReader = new FileSvgReader(new WpfDrawingSettings())
+                var rawReader = new FileSvgReader(new WpfDrawingSettings
+                {
+                    EnsureViewboxSize = false,
+                    EnsureViewboxPosition = false,
+                })
                 {
                     SaveXaml = false,
                 };
@@ -95,9 +99,11 @@ namespace Walterlv.Tools
                 }
 
                 var pathData = SvgPathCombiner.Combine(drawing);
-                AfterPath.Data = pathData;
-                AfterTextEditor.Text = pathData.ToString(CultureInfo.InvariantCulture);
-                AfterPathBorder.InvalidateProperty(Border.BorderBrushProperty);
+                if (pathData is not null)
+                {
+                    AfterPath.Data = pathData;
+                    AfterTextEditor.Text = pathData.ToString(CultureInfo.InvariantCulture);
+                }
             }
         }
 
@@ -109,12 +115,10 @@ namespace Walterlv.Tools
                 {
                     var pathData = Geometry.Parse(AfterTextEditor.Text);
                     AfterPath.Data = pathData;
-                    AfterPathBorder.InvalidateProperty(Border.BorderBrushProperty);
                 }
                 catch (Exception ex)
                 {
                     AfterPath.Data = null;
-                    AfterPathBorder.SetCurrentValue(Border.BorderBrushProperty, Brushes.Red);
                 }
             }
         }
