@@ -90,7 +90,8 @@
         <Grid x:Name="AfterPanel" Grid.Row="1" Grid.Column="1">
             <TextBox x:Name="AfterTextEditor"
                      Foreground="#0000ff" Padding="0 2" TextWrapping="Wrap"
-                     FontSize="16" FontFamily="Consolas,Microsoft YaHei"
+                     BorderThickness="0" FontSize="16" FontFamily="Consolas,Microsoft YaHei"
+                     VerticalScrollBarVisibility="Visible"
                      TextChanged="AfterTextEditor_TextChanged" />
         </Grid>
 

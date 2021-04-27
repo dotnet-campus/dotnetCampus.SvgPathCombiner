@@ -37,33 +37,37 @@ namespace Walterlv.Tools
 
         public static StreamGeometry Combine(DrawingGroup drawingGroup)
         {
-            return RecursiveCombine(drawingGroup, null);
+            return RecursiveCombine(drawingGroup, null, Matrix.Identity);
         }
 
-        private static StreamGeometry RecursiveCombine(DrawingGroup drawingGroup, StreamGeometry? currentGeometry)
+        private static StreamGeometry RecursiveCombine(DrawingGroup drawingGroup, StreamGeometry? currentGeometry, Matrix currentTransform)
         {
             foreach (var drawing in drawingGroup.Children.OfType<Drawing>())
             {
+                var transform = currentTransform;
                 if (drawing is DrawingGroup dg)
                 {
-                    currentGeometry = RecursiveCombine(dg, currentGeometry);
+                    var dgTransform = dg.Transform?.Value ?? Matrix.Identity;
+                    transform = currentTransform * dgTransform;
+                    currentGeometry = RecursiveCombine(dg, currentGeometry, transform);
                 }
                 else if (drawing is GeometryDrawing gd)
                 {
                     if (gd.Geometry is PathGeometry pg)
                     {
-                        currentGeometry = RecursiveCombine(pg, currentGeometry);
+                        var geometry = Transform(pg, currentTransform);
+                        currentGeometry = RecursiveCombine(currentGeometry, geometry);
                     }
                 }
             }
             return currentGeometry!;
         }
 
-        private static StreamGeometry RecursiveCombine(PathGeometry geometry1, StreamGeometry? geometry2)
+        private static StreamGeometry RecursiveCombine(StreamGeometry? geometry1, PathGeometry geometry2)
         {
-            if (geometry2 is null)
+            if (geometry1 is null)
             {
-                var path = geometry1.ToString(CultureInfo.InvariantCulture);
+                var path = geometry2.ToString(CultureInfo.InvariantCulture);
                 var result = (StreamGeometry)Geometry.Parse(path);
                 return result;
             }
@@ -75,12 +79,22 @@ namespace Walterlv.Tools
                 var mIndex = path2.IndexOf('M');
                 if (mIndex > 0)
                 {
+                    // 严格来说，不能去掉前面的 F0（EvenOdd）和 F1（NonZero）合并方式；但如果合并方式不同，也无法合并呀……
                     path2 = path2[mIndex..];
                 }
 
                 var result = (StreamGeometry)Geometry.Parse(path1 + path2);
                 return result;
             }
+        }
+
+        private static PathGeometry Transform(PathGeometry pathGeometry, Matrix transform)
+        {
+            if (transform == Matrix.Identity)
+            {
+                return pathGeometry;
+            }
+            return Geometry.Combine(pathGeometry, pathGeometry, GeometryCombineMode.Intersect, new MatrixTransform(transform));
         }
     }
 }
