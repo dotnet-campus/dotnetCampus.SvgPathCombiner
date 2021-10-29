@@ -101,7 +101,7 @@ namespace Walterlv.Tools
                 var pathData = SvgPathCombiner.Combine(drawing);
                 if (pathData is not null)
                 {
-                    AfterPath.Data = pathData;
+                    AfterPath.Data = Geometry.Parse(pathData);
                     AfterTextEditor.Text = pathData.ToString(CultureInfo.InvariantCulture);
                 }
             }
