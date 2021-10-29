@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
+using System.Security.Cryptography.Xml;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
+
+using Walterlv.MiniLanguages;
 
 namespace Walterlv.Tools
 {
@@ -35,66 +39,48 @@ namespace Walterlv.Tools
             return false;
         }
 
-        public static StreamGeometry Combine(DrawingGroup drawingGroup)
+        public static string Combine(DrawingGroup drawingGroup)
         {
-            return RecursiveCombine(drawingGroup, null, Matrix.Identity);
-        }
-
-        private static StreamGeometry RecursiveCombine(DrawingGroup drawingGroup, StreamGeometry? currentGeometry, Matrix currentTransform)
-        {
+            string? currentGeometry = null;
             foreach (var drawing in drawingGroup.Children.OfType<Drawing>())
             {
-                var transform = currentTransform;
                 if (drawing is DrawingGroup dg)
                 {
-                    var dgTransform = dg.Transform?.Value ?? Matrix.Identity;
-                    transform = currentTransform * dgTransform;
-                    currentGeometry = RecursiveCombine(dg, currentGeometry, transform);
+                    var path1 = currentGeometry;
+                    var path2 = Combine(dg);
+                    currentGeometry = RecursiveCombine(path1, path2);
                 }
                 else if (drawing is GeometryDrawing gd)
                 {
                     if (gd.Geometry is PathGeometry pg)
                     {
-                        var geometry = Transform(pg, currentTransform);
-                        currentGeometry = RecursiveCombine(currentGeometry, geometry);
+                        var path1 = currentGeometry;
+                        var path2 = pg.ToString(CultureInfo.InvariantCulture);
+                        currentGeometry = RecursiveCombine(path1, path2);
                     }
                 }
             }
-            return currentGeometry!;
+            var visitor = new PathTransformVisitor(drawingGroup.Transform);
+            MiniLanguageParser.Visit(currentGeometry!, visitor);
+            return visitor.ToString();
         }
 
-        private static StreamGeometry RecursiveCombine(StreamGeometry? geometry1, PathGeometry geometry2)
+        private static string RecursiveCombine(string? path1, string path2)
         {
-            if (geometry1 is null)
+            if (path1 is null)
             {
-                var path = geometry2.ToString(CultureInfo.InvariantCulture);
-                var result = (StreamGeometry)Geometry.Parse(path);
-                return result;
+                return path2;
             }
             else
             {
-                var path1 = geometry1.ToString(CultureInfo.InvariantCulture);
-                var path2 = geometry2.ToString(CultureInfo.InvariantCulture);
-
                 var mIndex = path2.IndexOf('M');
                 if (mIndex > 0)
                 {
-                    // 严格来说，不能去掉前面的 F0（EvenOdd）和 F1（NonZero）合并方式；但如果合并方式不同，也无法合并呀……
                     path2 = path2[mIndex..];
                 }
 
-                var result = (StreamGeometry)Geometry.Parse(path1 + path2);
-                return result;
+                return path1 + path2;
             }
-        }
-
-        private static PathGeometry Transform(PathGeometry pathGeometry, Matrix transform)
-        {
-            if (transform == Matrix.Identity)
-            {
-                return pathGeometry;
-            }
-            return Geometry.Combine(pathGeometry, pathGeometry, GeometryCombineMode.Intersect, new MatrixTransform(transform));
         }
     }
 }
