@@ -52,7 +52,12 @@ namespace Walterlv.Tools
                 }
                 else if (drawing is GeometryDrawing gd)
                 {
-                    if (gd.Geometry is PathGeometry pg)
+                    if (gd.Brush.Opacity == 0d
+                        || gd.Brush is SolidColorBrush scb && scb.Color.A == 0)
+                    {
+                        // 不可见图形。
+                    }
+                    else if (gd.Geometry is PathGeometry pg)
                     {
                         var path1 = currentGeometry;
                         var path2 = pg.ToString(CultureInfo.InvariantCulture);
@@ -60,9 +65,16 @@ namespace Walterlv.Tools
                     }
                 }
             }
-            var visitor = new PathTransformVisitor(drawingGroup.Transform);
-            MiniLanguageParser.Visit(currentGeometry!, visitor);
-            return visitor.ToString();
+            if (currentGeometry is null)
+            {
+                return "";
+            }
+            else
+            {
+                var visitor = new PathTransformVisitor(drawingGroup.Transform);
+                MiniLanguageParser.Visit(currentGeometry, visitor);
+                return visitor.ToString();
+            }
         }
 
         private static string RecursiveCombine(string? path1, string path2)

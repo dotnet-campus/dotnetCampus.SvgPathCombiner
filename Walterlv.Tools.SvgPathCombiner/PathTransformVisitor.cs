@@ -29,7 +29,7 @@ namespace Walterlv.Tools
         {
             _figure = new PathFigure
             {
-                StartPoint = _transform.Transform(startPoint)
+                StartPoint = TransformPoint(startPoint)
             };
             _path.Figures.Add(_figure);
         }
@@ -37,24 +37,24 @@ namespace Walterlv.Tools
         public override void L(Point lastPoint, Point endPoint)
         {
             _figure.Segments.Add(new LineSegment(
-                _transform.Transform(endPoint),
+                TransformPoint(endPoint),
                 false));
         }
 
         public override void C(Point lastPoint, Point controlPoint1, Point controlPoint2, Point endPoint)
         {
             _figure.Segments.Add(new BezierSegment(
-                _transform.Transform(controlPoint1),
-                _transform.Transform(controlPoint2),
-                _transform.Transform(endPoint),
+                TransformPoint(controlPoint1),
+                TransformPoint(controlPoint2),
+                TransformPoint(endPoint),
                 false));
         }
 
         public override void Q(Point lastPoint, Point controlPoint, Point endPoint)
         {
             _figure.Segments.Add(new QuadraticBezierSegment(
-                _transform.Transform(controlPoint),
-                _transform.Transform(endPoint),
+                TransformPoint(controlPoint),
+                TransformPoint(endPoint),
                 false));
         }
 
@@ -62,7 +62,7 @@ namespace Walterlv.Tools
         {
             var scale = GetScaleSize(_transform.Value);
             _figure.Segments.Add(new ArcSegment(
-                _transform.Transform(endPoint),
+                TransformPoint(endPoint),
                 new Size(size.Width * scale.Width, size.Height * scale.Height),
                 rotationAngle,
                 isLargeArc,
@@ -100,6 +100,26 @@ namespace Walterlv.Tools
         public override string ToString()
         {
             return _path.ToString();
+        }
+
+        private Point TransformPoint(Point point)
+        {
+            if (_transform is MatrixTransform mt)
+            {
+                if (mt.Matrix == Matrix.Identity)
+                {
+                    return point;
+                }
+
+                if (mt.Matrix.M11 == 1 && mt.Matrix.M22 == 1
+                    && mt.Matrix.M12 == 0 && mt.Matrix.M21 == 0)
+                {
+                    return new Point(
+                        (double)((decimal)point.X + (decimal)mt.Matrix.OffsetX),
+                        (double)((decimal)point.Y + (decimal)mt.Matrix.OffsetY));
+                }
+            }
+            return _transform.Transform(point);
         }
     }
 }

@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:Walterlv.Tools"
         xmlns:avalon="http://icsharpcode.net/sharpdevelop/avalonedit"
         mc:Ignorable="d"
-        Title="SVG 路径化 (v1.1 2021.10.29)" Height="450" Width="800"
+        Title="SVG 路径化 (v1.2 2021.11.01)" Height="450" Width="800"
         UseLayoutRounding="True">
 
     <FrameworkElement.Resources>
