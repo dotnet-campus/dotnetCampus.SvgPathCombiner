@@ -52,8 +52,11 @@ namespace Walterlv.Tools
                 }
                 else if (drawing is GeometryDrawing gd)
                 {
-                    if (gd.Brush.Opacity == 0d
-                        || gd.Brush is SolidColorBrush scb && scb.Color.A == 0)
+                    if (gd.Brush is null)
+                    {
+                        // 不可见图形。
+                    }
+                    else if (gd.Brush is SolidColorBrush scb && scb.Color.A == 0)
                     {
                         // 不可见图形。
                     }
